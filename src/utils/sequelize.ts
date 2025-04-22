@@ -1,22 +1,25 @@
 import { logger } from '@/server';
-import { Sequelize } from '@sequelize/core';
-import { PostgresDialect } from '@sequelize/postgres';
+import { Sequelize, Options, Dialect } from 'sequelize';
 
 // Import the environment variables from the .env file
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const sequelize: Sequelize = new Sequelize({
-    dialect: PostgresDialect,
+const dbConfig: Options = {
+    dialect: 'postgres' as Dialect,
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: Number(process.env.POSTGRES_PORT) || 5432,
+    database: process.env.POSTGRES_DB || 'postgres',
+    username: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || 'yourpassword',
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    define: {
+        timestamps: false,
+        freezeTableName: true,
+    },
+};
 
-    host: process.env.POSTGRES_HOST,
-    port: Number(process.env.POSTGRES_PORT),
-    database: process.env.POSTGRES_DB,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    ssl: false,
-    clientMinMessages: 'notice',
-});
+const sequelize = new Sequelize(dbConfig);
 
 // Test the connection to the database
 sequelize.authenticate()
@@ -26,3 +29,6 @@ sequelize.authenticate()
     .catch((error) => {
         logger.error('Unable to connect to the database:', error);
     });
+
+
+export default sequelize;
