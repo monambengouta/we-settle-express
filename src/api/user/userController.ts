@@ -13,8 +13,7 @@ class UserController {
 
 	public LoginByEmailAndPassword: RequestHandler = async (req: Request, res: Response) => {
 		const { email, password } = req.body as { email: string; password: string };
-		const serviceResponse = await userService.findByEmailAndPasswordAsync(email, password);
-		console.log(`🚀 ~ UserController ~ LoginByEmailAndPassword:RequestHandler= ~ { email, password }:`, { email, password })
+		const serviceResponse = await userService.loginByEmailAndPasswordAsync(email, password);
 		return handleServiceResponse(serviceResponse, res) as unknown as ReturnType<RequestHandler>;
 	};
 }
