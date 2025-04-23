@@ -1,5 +1,6 @@
 import { env } from "@/common/utils/envConfig";
 import { app, logger } from "@/server";
+import sequelize from "./utils/sequelize";
 
 const server = app.listen(env.PORT, () => {
 	const { NODE_ENV, HOST, PORT } = env;
@@ -8,6 +9,10 @@ const server = app.listen(env.PORT, () => {
 
 const onCloseSignal = () => {
 	logger.info("sigint received, shutting down");
+
+	sequelize.close().then(() => {
+		logger.info("sequelize connection closed");
+	});
 	server.close(() => {
 		logger.info("server closed");
 		process.exit();
