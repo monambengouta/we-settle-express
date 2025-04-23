@@ -13,7 +13,7 @@ describe("userService", () => {
 
 	const mockUsers: User[] = [
 		{
-			id: 1,
+			id: "1",
 			name: "Alice",
 			email: "alice@example.com",
 			age: 42,
@@ -21,7 +21,7 @@ describe("userService", () => {
 			updatedAt: new Date(),
 		},
 		{
-			id: 2,
+			id: "2",
 			name: "Bob",
 			email: "bob@example.com",
 			age: 21,

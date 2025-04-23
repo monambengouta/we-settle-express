@@ -56,6 +56,7 @@ Inscription.init({
         type: DataTypes.DATE,
         allowNull: true,
     }
+
 }, {
     sequelize,
     modelName: 'inscription',

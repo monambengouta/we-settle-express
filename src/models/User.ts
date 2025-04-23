@@ -12,10 +12,6 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'user_id'> { }
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public user_id!: string;
     public password!: string;
-
-    // Timestamps (if you want them)
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
 }
 
 User.init({

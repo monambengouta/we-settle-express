@@ -28,8 +28,8 @@ module.exports = {
           validated: false,
           bearer_token: null,
           validation_date: null,
-          created_at: new Date(),
-          updated_at: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         {
           id: uuidv4(),
@@ -40,8 +40,8 @@ module.exports = {
           validated: false,
           bearer_token: null,
           validation_date: null,
-          created_at: new Date(),
-          updated_at: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ], {});
     } catch (error) {
