@@ -11,7 +11,7 @@ export interface MailOptions {
 const transporter = nodemailer.createTransport({
     service: "gmail", // Use other services if needed
     auth: {
-        user: process.env.EMAIL_USERNAME,
+        user: "monaam.bengouta@gmail.com",
         pass: process.env.EMAIL_PASSWORD,
     },
 });

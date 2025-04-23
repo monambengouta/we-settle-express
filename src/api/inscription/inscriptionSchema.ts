@@ -18,9 +18,19 @@ export const InscriptionSchema = z.object({
 
 // Input Validation for 'GET users/:id' endpoint
 export const ValidateInscriptionSchema = z.object({
-	params: z.object({ user_id: commonValidations.id }),
+	params: z.object({ subId: commonValidations.id }),
 });
 
 export const ValidateInscriptionResponseSchema = z.object({
 	validated: z.boolean(),
+});
+
+export const GenerateAccessTokenForInscriptionSchema = z.object({
+	params: z.object({ subId: commonValidations.id }),
+});
+
+export const GenerateAccessTokenForInscriptionSchemaResponseSchema = z.object({
+	validated: z.boolean(),
+	tokenSent: z.boolean(),
+	tokenRefreshed: z.boolean(),
 });

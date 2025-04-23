@@ -4,6 +4,7 @@ import { ServiceResponse } from "@/common/models/serviceResponse";
 import { JwtService } from "@/common/utils/accessToken";
 import type Inscription from "@/models/Inscription";
 import { logger } from "@/server";
+import { sendEmail } from "@/utils/email";
 import { InscriptionRepository } from "./inscriptionRepository";
 
 export class InscriptionService {
@@ -18,103 +19,154 @@ export class InscriptionService {
 	 * @param Inscription_id - The ID of the inscription to validate.
 	 * @returns A ServiceResponse indicating the result of the operation.
 	 */
-	async validateInscription(Inscription_id: string): Promise<
+	async validateInscription(inscriptionId: string): Promise<
 		ServiceResponse<{
 			validated: boolean;
+		}>
+	> {
+		try {
+			const inscription = await this.inscriptionRepository.findInscriptionByIdAsync(inscriptionId);
+
+			if (!inscription) {
+				return ServiceResponse.failure(
+					"Inscription not found",
+					{
+						validated: false
+					},
+					StatusCodes.NOT_FOUND
+				);
+			}
+
+			if (!inscription.validated) {
+				inscription.setDataValue("validation_date", new Date());
+				inscription.setDataValue("validated", true);
+				await inscription.save();
+			}
+
+			return ServiceResponse.success(
+				"Inscription validated successfully",
+				{ validated: true }
+			);
+		} catch (ex) {
+			const errorMessage = `Error validating inscription ${inscriptionId}: ${(ex as Error).message}`;
+			logger.error(errorMessage);
+			return ServiceResponse.failure(
+				"An error occurred while validating inscription",
+				{
+					validated: false
+				},
+				StatusCodes.INTERNAL_SERVER_ERROR
+			);
+		}
+	}
+	/**
+	 * 
+	 * @param inscriptionId - The ID of the inscription to handle the token for.
+	 * @returns  A ServiceResponse indicating the result of the operation.
+	 *      - The response contains an object with the following properties:
+	 * 		- validated: boolean indicating if the inscription was validated.
+	 * 		- tokenSent: boolean indicating if the token was sent to the user.
+	 */
+	async handleInscriptionToken(inscriptionId: string): Promise<
+		ServiceResponse<{
+			validated: boolean;
+			tokenSent: boolean;
+			tokenRefreshed: boolean;
 		} | null>
 	> {
 		try {
+			const inscription = await this.inscriptionRepository.findInscriptionByIdAsync(inscriptionId);
 
-			// it return sequilize inscription object
-			const inscriptionObject =
-				await this.inscriptionRepository.findInscriptionByIdAsync(
-					Inscription_id
-				)
-
-
-
-			if (!inscriptionObject) {
+			if (!inscription) {
 				return ServiceResponse.failure(
 					"Inscription not found",
 					null,
 					StatusCodes.NOT_FOUND
 				);
 			}
-			// it return plain object of inscription
-			const insc = inscriptionObject?.toJSON()
 
-			const jwtService = new JwtService()
+			const insc = inscription.toJSON();
+			const jwtService = new JwtService();
+			let tokenToSend: string | null = null;
+			let tokenRefreshed = false;
+
+			// Ensure inscription is validated first
 			if (!insc.validated) {
-				// generate a new token
-				const newToken = jwtService.generateToken({
-					user_id: insc.user_id,
-					inscription_id: insc.id,
-
-				}, {});
-
-
-				inscriptionObject.setDataValue("bearer_token", newToken);
-				inscriptionObject.setDataValue("validation_date", new Date());
-				inscriptionObject.setDataValue("validated", true);
-				inscriptionObject.save();
-
-				return ServiceResponse.success<{
-					validated: boolean;
-				}>("Inscription found", { validated: true });
+				return ServiceResponse.failure(
+					"Inscription must be validated first",
+					null,
+					StatusCodes.BAD_REQUEST
+				);
 			}
 
-			if (insc.bearer_token) {
-				// check if the token is expired
+			// Handle token logic
+			if (!insc.bearer_token) {
+				tokenToSend = jwtService.generateToken(
+					{
+						user_id: insc.user_id,
+						inscription_id: insc.id,
+					},
+					{}
+				);
+				tokenRefreshed = true;
+			} else {
 				const isTokenExpired = jwtService.isTokenExpired(insc.bearer_token);
 				if (isTokenExpired) {
-					// generate a new token
-					const newToken = jwtService.generateToken({
-						user_id: insc.id,
-						inscription_id: insc.id,
-
-					}, {});
-					inscriptionObject.setDataValue("bearer_token", newToken);
-					inscriptionObject.setDataValue("validation_date", new Date());
-					inscriptionObject.setDataValue("validated", true);
-					inscriptionObject.save();
-
-					return ServiceResponse.success<{
-						validated: boolean;
-					}>("Inscription found", { validated: true });
+					tokenToSend = jwtService.generateToken(
+						{
+							user_id: insc.user_id,
+							inscription_id: insc.id,
+						},
+						{}
+					);
+					tokenRefreshed = true;
+				} else {
+					tokenToSend = insc.bearer_token;
 				}
-
-				this.sendTokenToUser(insc.id);
-
-
-				return ServiceResponse.success<{
-					validated: boolean;
-				}>("Inscription found", { validated: true });
-				// biome-ignore lint/style/noUselessElse: <explanation>
-			} else {
-				this.sendTokenToUser(insc.id);
-
 			}
-			return ServiceResponse.success<{
-				validated: boolean;
-			}>("Inscription found", { validated: true });
 
+			// Update inscription if token was refreshed
+			if (tokenRefreshed) {
+				inscription.setDataValue("bearer_token", tokenToSend);
+				inscription.setDataValue("validation_date", new Date());
+				await inscription.save();
+			}
+
+			// Send token
+			let tokenSent = false;
+			if (tokenToSend) {
+				await this.sendTokenToUser(insc.email, tokenToSend);
+				tokenSent = true;
+			}
+
+			return ServiceResponse.success(
+				"Token processed successfully",
+				{
+					validated: true,
+					tokenSent,
+					tokenRefreshed
+				}
+			);
 
 		} catch (ex) {
-			const errorMessage = `Error finding Inscription with id ${Inscription_id}:, ${(ex as Error).message
-				}`;
+			const errorMessage = `Error handling inscription token ${inscriptionId}: ${(ex as Error).message}`;
 			logger.error(errorMessage);
 			return ServiceResponse.failure(
-				"An error occurred while finding Inscription.",
+				"An error occurred while handling inscription token",
 				null,
 				StatusCodes.INTERNAL_SERVER_ERROR
 			);
 		}
 	}
 
-	public sendTokenToUser = async (inscriptionId: Inscription["id"]): Promise<void> => {
-		// not implemented yet
-		logger.info("Sending token to user: ", inscriptionId);
-	}
+	public sendTokenToUser = async (email: string, token: string): Promise<void> => {
+		sendEmail({
+			from: process.env.EMAIL_USERNAME ?? "",
+			to: email,
+			subject: "Inscription Token",
+			text: `Your token is: ${token}`,
+		})
+	};
 }
 
 export const inscriptionService = new InscriptionService();
