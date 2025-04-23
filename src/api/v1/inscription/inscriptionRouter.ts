@@ -8,6 +8,7 @@ import { validateRequest } from "@/common/utils/httpHandlers";
 import { inscriptionController } from "./InscriptionController";
 import { GenerateAccessTokenForInscriptionSchema, GenerateAccessTokenForInscriptionSchemaResponseSchema, GetInscriptionsResponseSchema, InscriptionSchema, ValidateInscriptionResponseSchema, ValidateInscriptionSchema } from "./inscriptionSchema";
 
+const API_VERSION = "v1";
 export const inscriptionRegistry = new OpenAPIRegistry();
 export const inscriptionRouter: Router = express.Router();
 
@@ -23,7 +24,7 @@ inscriptionRegistry.register("Inscription", InscriptionSchema);
 
 inscriptionRegistry.registerPath({
 	method: "get",
-	path: "/inscriptions/all",
+	path: `/api/${API_VERSION}/inscriptions/all`,
 	tags: ["Inscription"],
 	security: [{ bearerAuth: [] }], // This marks the endpoint as protected
 	responses: {
@@ -40,7 +41,7 @@ inscriptionRouter.get(
 
 inscriptionRegistry.registerPath({
 	method: "post",
-	path: "/inscriptions/validate/{subId}",
+	path: `api/${API_VERSION}/inscriptions/validate/{subId}`,
 	tags: ["Inscription"],
 	security: [{ bearerAuth: [] }], // This marks the endpoint as protected
 	request: {
@@ -63,7 +64,7 @@ inscriptionRouter.post(
 
 inscriptionRegistry.registerPath({
 	method: "post",
-	path: "/inscriptions/g-token/{subId}",
+	path: `api/${API_VERSION}/inscriptions/g-token/{subId}`,
 	tags: ["Inscription"],
 	security: [{ bearerAuth: [] }], // This marks the endpoint as protected
 	request: {

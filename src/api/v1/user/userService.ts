@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-import { UserRepository } from "@/api/user/userRepository";
+import { UserRepository } from "@/api/v1/user/userRepository";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { JwtService } from "@/common/utils/accessToken";
 import type User from "@/models/User";

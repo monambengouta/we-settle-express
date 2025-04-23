@@ -1,7 +1,6 @@
 import type { Request, RequestHandler, Response } from "express";
 
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
-import { logger } from "@/server";
 import { inscriptionService } from "./inscriptionService";
 
 class InscriptionController {
