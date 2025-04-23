@@ -7,6 +7,7 @@ extendZodWithOpenApi(z);
 
 export type User = z.infer<typeof UserSchema>;
 export const UserSchema = z.object({
+	user_id: commonValidations.id,
 	password: z.string().min(8, "Password must be at least 8 characters long"),
 	email: z.string().email("Invalid email address"),
 	firstName: z.string().min(1, "First name is required"),
