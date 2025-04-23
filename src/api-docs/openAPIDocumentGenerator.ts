@@ -6,6 +6,15 @@ import { userRegistry } from "@/api/user/userRouter";
 
 export function generateOpenAPIDocument() {
 	const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, inscriptionRegistry]);
+
+	// Register security scheme
+	registry.registerComponent('securitySchemes', 'bearerAuth', {
+		type: 'http',
+		scheme: 'bearer',
+		bearerFormat: 'JWT',
+		description: 'Enter JWT token in the format: Bearer <token>'
+	});
+
 	const generator = new OpenApiGeneratorV3(registry.definitions);
 
 	return generator.generateDocument({
@@ -18,5 +27,7 @@ export function generateOpenAPIDocument() {
 			description: "View the raw OpenAPI Specification in JSON format",
 			url: "/swagger.json",
 		},
+		// Apply security globally to all endpoints
+		security: [{ bearerAuth: [] }]
 	});
 }
