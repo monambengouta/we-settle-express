@@ -6,7 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { authenticateJWT } from "@/common/middleware/authMiddleware";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { inscriptionController } from "./InscriptionController";
-import { GenerateAccessTokenForInscriptionSchema, GenerateAccessTokenForInscriptionSchemaResponseSchema, InscriptionSchema, ValidateInscriptionResponseSchema, ValidateInscriptionSchema } from "./inscriptionSchema";
+import { GenerateAccessTokenForInscriptionSchema, GenerateAccessTokenForInscriptionSchemaResponseSchema, GetInscriptionsResponseSchema, InscriptionSchema, ValidateInscriptionResponseSchema, ValidateInscriptionSchema } from "./inscriptionSchema";
 
 export const inscriptionRegistry = new OpenAPIRegistry();
 export const inscriptionRouter: Router = express.Router();
@@ -20,6 +20,23 @@ inscriptionRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 
 inscriptionRegistry.register("Inscription", InscriptionSchema);
+
+inscriptionRegistry.registerPath({
+	method: "get",
+	path: "/inscriptions/all",
+	tags: ["Inscription"],
+	security: [{ bearerAuth: [] }], // This marks the endpoint as protected
+	responses: {
+		...createApiResponse(GetInscriptionsResponseSchema, "Success"),
+		401: { description: "Unauthorized - Invalid or missing token" },
+		403: { description: "Forbidden - Insufficient permissions" },
+	}
+});
+inscriptionRouter.get(
+	"/all",
+	authenticateJWT, // Middleware to check JWT token
+	inscriptionController.GetAllInscriptions,
+);
 
 inscriptionRegistry.registerPath({
 	method: "post",

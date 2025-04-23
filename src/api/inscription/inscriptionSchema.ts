@@ -34,3 +34,10 @@ export const GenerateAccessTokenForInscriptionSchemaResponseSchema = z.object({
 	tokenSent: z.boolean(),
 	tokenRefreshed: z.boolean(),
 });
+
+export const GetInscriptionsResponseSchema = z.array(
+	InscriptionSchema.omit({
+		bearer_token: true,
+		validation_date: true,
+	})
+)

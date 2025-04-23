@@ -184,6 +184,26 @@ export class InscriptionService {
 		}
 	}
 
+	async getAllInscriptions(): Promise<
+		ServiceResponse<Inscription[] | null>
+	> {
+		try {
+			const inscriptions = await this.inscriptionRepository.findAllInscriptionsAsync();
+			return ServiceResponse.success(
+				"Inscriptions fetched successfully",
+				inscriptions
+			);
+		} catch (ex) {
+			const errorMessage = `Error fetching inscriptions: ${(ex as Error).message}`;
+			logger.error(errorMessage);
+			return ServiceResponse.failure(
+				"An error occurred while fetching inscriptions",
+				null,
+				StatusCodes.INTERNAL_SERVER_ERROR
+			);
+		}
+	}
+
 	/**
 	 * Sends an inscription token to the specified user's email address.
 	 *

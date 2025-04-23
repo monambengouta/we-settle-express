@@ -16,4 +16,17 @@ export class InscriptionRepository {
 
 	}
 
+	async findAllInscriptionsAsync(): Promise<Inscription[]> {
+		return Inscription.findAll({
+			attributes: { exclude: ['bearer_token'] },
+			include: [{
+				model: User,
+				as: 'user',
+				required: true,
+				attributes: ["user_id", "firstName", "lastName", "email"]
+			}]
+		});
+	}
+
+
 }
