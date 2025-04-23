@@ -1,55 +1,31 @@
-// models/Inscription.ts
+// models/User.ts
 import sequelize from "@/utils/sequelize";
 import { DataTypes, Model, type Optional } from "sequelize";
-import User from "./User";
 
-interface InscriptionAttributes {
-    id: string;
+interface UserAttributes {
     user_id: string;
-    name: string;
-    lastname: string;
     email: string;
-    validated: boolean;
-    bearer_token: string | null;
-    validation_date: Date | null;
+    password: string;
+    firstName?: string;
+    lastName?: string;
 }
 
-interface InscriptionCreationAttributes extends Optional<InscriptionAttributes, "id"> { }
+interface UserCreationAttributes extends Optional<UserAttributes, "user_id"> { }
 
-class Inscription extends Model<InscriptionAttributes, InscriptionCreationAttributes>
-    implements InscriptionAttributes {
-    public id!: string;
+class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public user_id!: string;
-    public name!: string;
-    public lastname!: string;
     public email!: string;
-    public validated!: boolean;
-    public bearer_token!: string | null;
-    public validation_date!: Date | null;
+    public firstName?: string;
+    public lastName?: string;
+    public password!: string;
 }
 
-Inscription.init(
+User.init(
     {
-        id: {
+        user_id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-        },
-        user_id: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: User,
-                key: 'user_id'
-            }
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        lastname: {
-            type: DataTypes.STRING,
-            allowNull: false,
         },
         email: {
             type: DataTypes.STRING,
@@ -59,26 +35,25 @@ Inscription.init(
                 isEmail: true,
             },
         },
-        validated: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false,
-        },
-        bearer_token: {
+        firstName: {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        validation_date: {
-            type: DataTypes.DATE,
+        lastName: {
+            type: DataTypes.STRING,
             allowNull: true,
-        }
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
     },
     {
         sequelize,
-        modelName: "inscription",
-        tableName: "inscriptions",
+        modelName: "user",
+        tableName: "users",
         timestamps: true,
-    }
+    },
 );
 
-export default Inscription;
+export default User;

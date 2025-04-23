@@ -14,10 +14,17 @@ export class InscriptionService {
 		this.inscriptionRepository = repository;
 	}
 
+
 	/**
-	 * Validate an inscription by user ID.
-	 * @param Inscription_id - The ID of the inscription to validate.
-	 * @returns A ServiceResponse indicating the result of the operation.
+	 * Validates an inscription by its ID. If the inscription is found and not already validated,
+	 * it updates the validation date and marks it as validated.
+	 *
+	 * @param inscriptionId - The unique identifier of the inscription to validate.
+	 * @returns A promise that resolves to a `ServiceResponse` object containing the validation status.
+	 *          - On success: Returns a success response with `validated: true`.
+	 *          - On failure: Returns a failure response with an appropriate error message and `validated: false`.
+	 *
+	 * @throws Logs an error and returns a failure response if an exception occurs during the process.
 	 */
 	async validateInscription(inscriptionId: string): Promise<
 		ServiceResponse<{
@@ -59,13 +66,31 @@ export class InscriptionService {
 			);
 		}
 	}
+
+
+
 	/**
+	 * Handles the processing of an inscription token for a given inscription ID.
 	 * 
-	 * @param inscriptionId - The ID of the inscription to handle the token for.
-	 * @returns  A ServiceResponse indicating the result of the operation.
-	 *      - The response contains an object with the following properties:
-	 * 		- validated: boolean indicating if the inscription was validated.
-	 * 		- tokenSent: boolean indicating if the token was sent to the user.
+	 * This method performs the following steps:
+	 * 1. Validates the existence of the inscription in the repository.
+	 * 2. Ensures the inscription is validated before proceeding.
+	 * 3. Generates a new token if none exists or if the existing token is expired.
+	 * 4. Updates the inscription with the new token and validation date if a token is refreshed.
+	 * 5. Sends the token to the user's email if applicable.
+	 * 
+	 * @param inscriptionId - The unique identifier of the inscription to process.
+	 * @returns A promise that resolves to a `ServiceResponse` object containing:
+	 * - `validated`: A boolean indicating if the inscription is validated.
+	 * - `tokenSent`: A boolean indicating if the token was sent to the user.
+	 * - `tokenRefreshed`: A boolean indicating if the token was refreshed.
+	 * 
+	 * The method returns a failure response in the following cases:
+	 * - If the inscription is not found (`StatusCodes.NOT_FOUND`).
+	 * - If the inscription is not validated (`StatusCodes.BAD_REQUEST`).
+	 * - If an unexpected error occurs (`StatusCodes.INTERNAL_SERVER_ERROR`).
+	 * 
+	 * Logs any errors encountered during the process.
 	 */
 	async handleInscriptionToken(inscriptionId: string): Promise<
 		ServiceResponse<{
@@ -159,13 +184,27 @@ export class InscriptionService {
 		}
 	}
 
+	/**
+	 * Sends an inscription token to the specified user's email address.
+	 *
+	 * @param email - The email address of the recipient.
+	 * @param token - The token to be sent to the user.
+	 * @returns A promise that resolves when the email has been sent.
+	 *
+	 * @throws Will throw an error if the email sending process fails.
+	 */
 	public sendTokenToUser = async (email: string, token: string): Promise<void> => {
-		sendEmail({
-			from: process.env.EMAIL_USERNAME ?? "",
-			to: email,
-			subject: "Inscription Token",
-			text: `Your token is: ${token}`,
-		})
+		try {
+			sendEmail({
+				from: process.env.EMAIL_USERNAME ?? "",
+				to: email,
+				subject: "Inscription Token",
+				text: `Your token is: ${token}`,
+			})
+		} catch (error) {
+			logger.error(`Error sending token to user ${email}: ${(error as Error).message}`);
+			throw new Error(`Failed to send token to user: ${(error as Error).message}`);
+		}
 	};
 }
 
