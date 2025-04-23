@@ -49,7 +49,7 @@ Inscription.init({
         defaultValue: false,
     },
     bearer_token: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     validation_date: {

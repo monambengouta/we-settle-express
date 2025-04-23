@@ -10,6 +10,7 @@ import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
+import { inscriptionRouter } from "./api/inscription/inscriptionRouter";
 import sequelize from "./utils/sequelize";
 
 const logger = pino({ name: "server start" });
@@ -31,6 +32,7 @@ app.use(requestLogger);
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
+app.use("/inscriptions", inscriptionRouter);
 
 // Swagger UI
 app.use(openAPIRouter);

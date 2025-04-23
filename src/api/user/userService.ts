@@ -2,9 +2,9 @@ import { StatusCodes } from "http-status-codes";
 
 import { UserRepository } from "@/api/user/userRepository";
 import { ServiceResponse } from "@/common/models/serviceResponse";
-import { logger } from "@/server";
-import User from "@/models/User";
 import { JwtService } from "@/common/utils/accessToken";
+import type User from "@/models/User";
+import { logger } from "@/server";
 
 export class UserService {
 	private userRepository: UserRepository;
@@ -12,8 +12,6 @@ export class UserService {
 	constructor(repository: UserRepository = new UserRepository()) {
 		this.userRepository = repository;
 	}
-
-
 
 	// Retrieves a single user by their ID
 	async findById(id: string): Promise<ServiceResponse<User | null>> {
@@ -41,8 +39,10 @@ export class UserService {
 			const jwtService = new JwtService();
 			const accessToken = jwtService.generateToken({ user: userWithoutPassword }, { expiresIn: "1h" });
 
-			return ServiceResponse.success<User>("User found", { ...userWithoutPassword, accessToken: accessToken } as unknown as User);
-
+			return ServiceResponse.success<User>("User found", {
+				...userWithoutPassword,
+				accessToken: accessToken,
+			} as unknown as User);
 		} catch (ex) {
 			const errorMessage = `Error finding user with email ${email} password: ${password}:, ${(ex as Error).message}`;
 			logger.error(errorMessage);

@@ -18,5 +18,6 @@ export const validateRequest = (schema: ZodSchema) => (req: Request, res: Respon
 		const statusCode = StatusCodes.BAD_REQUEST;
 		const serviceResponse = ServiceResponse.failure(errorMessage, null, statusCode);
 		return handleServiceResponse(serviceResponse, res);
+
 	}
 };
