@@ -7,18 +7,29 @@ import { JwtService } from "../utils/accessToken";
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
 
+    // Check if the authorization header is present and starts with "Bearer "
     if (!authHeader) {
-        res.sendStatus(401).json(ServiceResponse.failure("Unauthorized - Invalid or missing token",
-            null,
-            StatusCodes.UNAUTHORIZED)); // Unauthorized
+        res.status(StatusCodes.UNAUTHORIZED).json(
+            ServiceResponse.failure(
+                "Unauthorized - Invalid or missing token",
+                null,
+                StatusCodes.UNAUTHORIZED
+            )
+        );
         return;
     }
 
     const token = authHeader.split(" ")[1];
+
+    // Check if the token is present
     if (!token) {
-        res.sendStatus(401).json(ServiceResponse.failure("Unauthorized - Invalid or missing token",
-            null,
-            StatusCodes.UNAUTHORIZED)); // Unauthorized
+        res.status(StatusCodes.UNAUTHORIZED).json(
+            ServiceResponse.failure(
+                "Unauthorized - Invalid or missing token",
+                null,
+                StatusCodes.UNAUTHORIZED
+            )
+        );
         return;
     }
 
@@ -26,17 +37,25 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     // Validate token
     if (!jwtServices.validateToken(token)) {
-        res.sendStatus(403).json(ServiceResponse.failure("Forbidden - Insufficient permissions",
-            null,
-            StatusCodes.FORBIDDEN)); // Unauthorized
+        res.status(StatusCodes.FORBIDDEN).json(
+            ServiceResponse.failure(
+                "Forbidden - Insufficient permissions",
+                null,
+                StatusCodes.FORBIDDEN
+            )
+        );
         return;
     }
 
     // Check expiration
     if (jwtServices.isTokenExpired(token)) {
-        res.sendStatus(401).json(ServiceResponse.failure("Unauthorized - Invalid or missing token",
-            null,
-            StatusCodes.UNAUTHORIZED)); // Unauthorized
+        res.status(StatusCodes.UNAUTHORIZED).json(
+            ServiceResponse.failure(
+                "Unauthorized - Token expired",
+                null,
+                StatusCodes.UNAUTHORIZED
+            )
+        );
         return;
     }
 
