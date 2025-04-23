@@ -1,4 +1,5 @@
 'use strict';
+const { email } = require('envalid');
 //
 const { v4: uuidv4 } = require('uuid');
 
@@ -8,6 +9,9 @@ module.exports = {
     await queryInterface.bulkInsert('users', [{
       user_id: uuidv4(),
       password: 'password123',
+      email: "john@mail.com",
+      firstName: "John",
+      lastName: "Doe",
       createdAt: new Date(),
       updatedAt: new Date()
     }], {});

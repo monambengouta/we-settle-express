@@ -28,6 +28,22 @@ export class UserService {
 			return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
 		}
 	}
+	async findByEmailAndPasswordAsync(email: string, password: string): Promise<ServiceResponse<User | null>> {
+		try {
+			const user = await this.userRepository.findByEmailAndPasswordAsync(email, password);
+			if (!user) {
+				return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+			}
+			const userWithoutPassword = { ...user.toJSON(), password: undefined };
+
+			return ServiceResponse.success<User>("User found", userWithoutPassword as unknown as User);
+
+		} catch (ex) {
+			const errorMessage = `Error finding user with email ${email} password: ${password}:, ${(ex as Error).message}`;
+			logger.error(errorMessage);
+			return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
 
 export const userService = new UserService();

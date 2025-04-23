@@ -3,7 +3,7 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetUserSchema, UserSchema } from "@/api/user/userModel";
+import { GetUserSchema, LoginResponseSchema, LoginSchema, UserSchema } from "@/api/user/userSchema";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 
@@ -21,3 +21,20 @@ userRegistry.registerPath({
 });
 
 userRouter.get("/:id", validateRequest(GetUserSchema) as any, userController.getUser);
+
+userRegistry.registerPath({
+	method: "post",
+	path: "/users/login",
+	tags: ["User"],
+	request: {
+		body: {
+			content: { "application/json": { schema: LoginSchema.shape.body } },
+			description: "Login request body",
+			required: true,
+
+		}
+	},
+	responses: createApiResponse(LoginResponseSchema, "Success"),
+});
+
+userRouter.post("/login", validateRequest(LoginSchema) as any, userController.LoginByEmailAndPassword,);

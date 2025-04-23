@@ -5,16 +5,19 @@ import User from "@/models/User";
 export class UserRepository {
 
 	async findByIdAsync(id: string): Promise<User | null> {
-		try {
-			const u = await User.findOne({
-				where: {
-					user_id: id,
-				}
-			});
-			return u
-		} catch (error) {
-			console.error("Error finding user by ID:", error);
-			return null;
-		}
+		return User.findOne({
+			where: {
+				user_id: id,
+			}
+		});
+	}
+	async findByEmailAndPasswordAsync(email: string, password: string): Promise<User | null> {
+		return User.findOne({
+			where: {
+				email: email,
+				password: password,
+			}
+		});
+
 	}
 }

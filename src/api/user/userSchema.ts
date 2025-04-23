@@ -18,3 +18,20 @@ export const UserSchema = z.object({
 export const GetUserSchema = z.object({
 	params: z.object({ id: commonValidations.id }),
 });
+
+
+export const LoginSchema = z.object({
+	body: z.object({
+		email: z.string().email("Invalid email address"),
+		password: z.string().min(8, "Password must be at least 8 characters long"),
+	}),
+});
+
+export const LoginResponseSchema = z.object({
+	message: z.string(),
+	data: UserSchema.omit({ password: true }).merge(
+		z.object({
+			token: z.string().optional(),
+			refreshToken: z.string().optional(),
+		})),
+});
