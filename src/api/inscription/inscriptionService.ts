@@ -48,7 +48,9 @@ export class InscriptionService {
 				inscription.setDataValue("validation_date", new Date());
 				inscription.setDataValue("validated", true);
 				await inscription.save();
+				this.sendSubscriptionEmail(inscription.toJSON().email, inscriptionId);
 			}
+
 
 			return ServiceResponse.success(
 				"Inscription validated successfully",
@@ -226,6 +228,19 @@ export class InscriptionService {
 			throw new Error(`Failed to send token to user: ${(error as Error).message}`);
 		}
 	};
+	public sendSubscriptionEmail = async (email: string, inscriptionId: string): Promise<void> => {
+		try {
+			sendEmail({
+				from: process.env.EMAIL_USERNAME ?? "",
+				to: email,
+				subject: "Inscription Confirmation",
+				text: `Your inscription with ID ${inscriptionId} has been confirmed.`,
+			})
+		} catch (error) {
+			logger.error(`Error sending subscription email to user ${email}: ${(error as Error).message}`);
+			throw new Error(`Failed to send subscription email to user: ${(error as Error).message}`);
+		}
+	}
 }
 
 export const inscriptionService = new InscriptionService();
