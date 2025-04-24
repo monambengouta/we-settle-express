@@ -99,3 +99,14 @@ We'd love to hear your feedback and suggestions for further improvements. Feel f
 
 14 directories, 31 files
 ```
+
+```code
+# to run
+pnpm install
+
+# run migrations and seeding
+pnpm migrate
+pnpm seed
+
+# run app
+pnpm start:dev
